@@ -16,3 +16,5 @@ The server has basic authentification implemented.
 
 First install node.js, then run `npm install` inside of the project folder.
 Moreover, create a `.env` file with your configurations. 
+
+To start the server run `npm start` or `node index.js`.
