@@ -1,0 +1,23 @@
+{
+  "name": "logo",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js"
+  },
+  "author": "Gery Hirschfeld <hirsch88>",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "express-basic-auth": "^1.2.0",
+    "express-rate-limit": "^5.1.1",
+    "helmet": "^3.21.3",
+    "node-snap7": "^1.0.3",
+    "pino": "^5.17.0",
+    "pino-http": "^4.4.0",
+    "pino-pretty": "^3.6.1"
+  }
+}
