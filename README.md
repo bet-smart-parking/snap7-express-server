@@ -108,5 +108,5 @@ $ pm2 startup systemd
 ```
 Copy the last line of the output and run it with superuser priviledges
 ```
-sudo env PATH=$PATH:/usr/local/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u pi --hp /home/pi
+$ sudo env PATH=$PATH:/usr/local/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u pi --hp /home/pi
 ```
