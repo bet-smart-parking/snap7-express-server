@@ -80,4 +80,17 @@ sudo npm install pm2@latest -g
 ```
 This will install pm2 globally.
 
+### Install Snap7 Express Server
 
+Install the node.js express REST server in ```/var```
+
+```
+$ sudo mkdir /var/node
+$ sudo chown pi.pi /var/node
+$ cd /var/node
+$ wget https://github.com/bet-smart-parking/snap7-express-server/archive/master.zip
+$ unzip master.zip
+$ npm install
+```
+
+Then configure ```.env``` File according to your system. ```PLC_IP``` is the address of the LOGO!8 box. 
