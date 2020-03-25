@@ -71,3 +71,13 @@ cd node-v12.16.1-linux-armv7l
 sudo cp -R * /usr/local
 ```
 
+### Installing PM2
+
+To deamonize the gateway application we us PM2. This allows us to start the gateway application in the background as a service.
+
+```
+sudo npm install pm2@latest -g
+```
+This will install pm2 globally.
+
+
