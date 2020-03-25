@@ -4,7 +4,7 @@ A simple node.js express REST server to write to a siemens logo.
 
 ## Usage
 
-One enpoint to open the gate.
+One endpoint to open the gate.
 
 ```bash
 $ curl --location --request GET 'http://localhost:3000' --header 'Authorization: Basic YWRtaW46c3VwZXJib2Nr'
