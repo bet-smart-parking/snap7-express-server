@@ -7,7 +7,7 @@ A simple node.js express REST server to write to a siemens logo.
 One enpoint to open the gate.
 
 ```bash
-curl --location --request GET 'http://localhost:3000' --header 'Authorization: Basic YWRtaW46c3VwZXJib2Nr'
+$ curl --location --request GET 'http://localhost:3000' --header 'Authorization: Basic YWRtaW46c3VwZXJib2Nr'
 ```
 
 The server has basic authentification implemented.
@@ -26,7 +26,7 @@ To start the server run `npm start` or `node index.js`.
 Get the official raspbian release from 
 
 ```
-https://www.raspberrypi.org/downloads/raspbian/
+$ https://www.raspberrypi.org/downloads/raspbian/
 ```
 
 #### Hint: Headless installation
@@ -57,18 +57,18 @@ https://nodejs.org/en/download/
 
 Get the installer for ARMv7 (Raspberry Pi I is not supported).
 ```
-wget https://nodejs.org/dist/v12.16.1/node-v12.16.1-linux-armv7l.tar.gz
+$ wget https://nodejs.org/dist/v12.16.1/node-v12.16.1-linux-armv7l.tar.gz
 ```
 
 Extract the file. Please make sure to change the filename.
 ```
-tar -xzf node-v12.16.1-linux-armv7l.tar.gz
+$ tar -xzf node-v12.16.1-linux-armv7l.tar.gz
 ```
 
 Change to the archive folder and cop Node to /usr/local
 ```
-cd node-v12.16.1-linux-armv7l
-sudo cp -R * /usr/local
+$ cd node-v12.16.1-linux-armv7l
+$ sudo cp -R * /usr/local
 ```
 
 ### Installing PM2
@@ -76,7 +76,7 @@ sudo cp -R * /usr/local
 To deamonize the gateway application we us PM2. This allows us to start the gateway application in the background as a service.
 
 ```
-sudo npm install pm2@latest -g
+$ sudo npm install pm2@latest -g
 ```
 This will install pm2 globally.
 
@@ -94,3 +94,19 @@ $ npm install
 ```
 
 Then configure ```.env``` File according to your system. ```PLC_IP``` is the address of the LOGO!8 box. 
+
+### Run Snap7 Express Server as Service
+
+Run the server through PM2
+```
+$ pm2 start index.js
+```
+
+Run PM2 on system startup
+```
+$ pm2 startup systemd
+```
+Copy the last line of the output and run it with superuser priviledges
+```
+sudo env PATH=$PATH:/usr/local/bin /usr/local/lib/node_modules/pm2/bin/pm2 startup systemd -u pi --hp /home/pi
+```
