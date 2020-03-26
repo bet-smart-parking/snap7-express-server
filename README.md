@@ -23,11 +23,7 @@ To start the server run `npm start` or `node index.js`.
 
 ### Setup raspbian
 
-Get the official raspbian release from 
-
-```
-$ https://www.raspberrypi.org/downloads/raspbian/
-```
+Get the official [Raspbian release](https://www.raspberrypi.org/downloads/raspbian/)
 
 #### Hint: Headless installation
 
