@@ -1,5 +1,7 @@
 # Snap7 Express Server
 
+[![DepShield Badge](https://depshield.sonatype.org/badges/bet-smart-parking/snap7-express-server/depshield.svg)](https://depshield.github.io)
+
 A simple node.js express REST server to write to a siemens logo.
 
 ## Usage
