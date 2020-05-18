@@ -9,22 +9,19 @@ const port = process.env.PORT
 
 App.use(helmet())
 
-App.use((req, res, next) => {
-    const startedAt = process.hrtime()
-
-    next();
-
-})
-
 App.get('/', async (req, res) => {
     const startedAt = process.hrtime()
     Log.info() // Line break
     Log.info('ENTER: ' + req.method + ' ' + req.url)
 
-    const gateClient = GateClient(process.env.PLC_IP)
-    await gateClient.connect()
-    await gateClient.open()
-    gateClient.disconnect()
+    try {
+        const gateClient = GateClient(process.env.PLC_IP)
+        await gateClient.connect()
+        await gateClient.open()
+        gateClient.disconnect()
+    } catch (e) {
+        return res.status(500).send('Could not connect to the gate system.')
+    }
 
     res.status(200).send('OK')
     const endedAt = process.hrtime(startedAt)
