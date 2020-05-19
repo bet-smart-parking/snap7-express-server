@@ -18,13 +18,15 @@ server.register_area(snap7.types.srvAreaDB, 1, data)
 
 server.start()
 
-
-
-
 try:
-    num = 0
     while (True):
-        num = num + 1
+        while (True):
+            event = server.pick_event()
+            if event:
+                logging.info(server.event_text(event))
+            else:
+                break
+        time.sleep(1)
 
 
 except KeyboardInterrupt:
