@@ -4,27 +4,42 @@ import time
 import snap7
 from snap7 import util
 import logging
+import configparser
+import requests
 
-
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 server = snap7.server.Server()
 server.create()
-
-size = 1
+size = 480
 data = (snap7.types.wordlen_to_ctypes[snap7.types.S7WLByte] * size)()
 data[0] = 5
 server.register_area(snap7.types.srvAreaDB, 1, data)
-
 server.start()
 
+config = configparser.ConfigParser()
+config.read('logo-mock.ini')
+logging.debug("Slackbot URL: " + config['SLACK']['SlackBotUrl'])
 
-
+slackQueryData = '''{
+    "channel": "#bets_smartparking_test",
+    "username": "LogoBot",
+    "icon_emoji": ":house:",
+    "type": "mrkdwn",
+    "text": "Gate 1 opened.",
+}'''
 
 try:
-    num = 0
     while (True):
-        num = num + 1
+        while (True):
+            event = server.pick_event()
+            if event:
+                logging.info(server.event_text(event))
+                if event.EvtCode == 0x00840000 and data[0] == 1:
+                    response = requests.post(config['SLACK']['SlackBotUrl'], data=slackQueryData)
+            else:
+                break
+        time.sleep(1)
 
 
 except KeyboardInterrupt:
@@ -32,3 +47,4 @@ except KeyboardInterrupt:
     server.stop()
     server.destroy()
     exit()
+    
