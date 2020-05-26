@@ -4,12 +4,15 @@ const helmet = require('helmet')
 const Log = require('./lib/log')
 const GateClient = require('./lib/gate-client')
 
+const swaggerUi = require('swagger-ui-express')
+const swaggerDocument = require('./assets/openapi.json')
+
 const App = express()
 const port = process.env.PORT
 
 App.use(helmet())
 
-App.get('/', async (req, res) => {
+App.get('/opengate/', async (req, res) => {
     const startedAt = process.hrtime()
     Log.info() // Line break
     Log.info('ENTER: ' + req.method + ' ' + req.url)
@@ -27,6 +30,8 @@ App.get('/', async (req, res) => {
     const endedAt = process.hrtime(startedAt)
     Log.info('EXIT: ' + req.method + ' ' + req.url + ' ' + res.statusCode + ' %ds %dms', endedAt[0], endedAt[1] / 1000000)
 })
+
+App.use('/docs/', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
 
 App.listen(port, () => {
     Log.info(`Server app listening on port ${port}!`)
