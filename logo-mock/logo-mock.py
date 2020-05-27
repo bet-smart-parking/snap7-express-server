@@ -21,13 +21,6 @@ config = configparser.ConfigParser()
 config.read('logo-mock.ini')
 logging.debug("Slackbot URL: " + config['SLACK']['SlackBotUrl'])
 
-slackQueryData = '''{
-    "channel": "#bets_smartparking_test",
-    "username": "LogoBot",
-    "icon_emoji": ":house:",
-    "type": "mrkdwn",
-    "text": "Gate 1 opened.",
-}'''
 
 try:
     while (True):
@@ -35,7 +28,14 @@ try:
             event = server.pick_event()
             if event:
                 logging.info(server.event_text(event))
-                if event.EvtCode == 0x00840000 and data[0] == 1:
+                if event.EvtCode == 0x00840000 and (data[0] == 1 or data[0] == 2):
+                    slackQueryData = '''{
+                        "channel": "#bets_smartparking_test",
+                        "username": "LogoBot",
+                        "icon_emoji": ":house:",
+                        "type": "mrkdwn",
+                        "text": "Gate ''' + str(data[0]) + ''' opened.",
+                        }'''
                     response = requests.post(config['SLACK']['SlackBotUrl'], data=slackQueryData)
             else:
                 break
@@ -47,4 +47,3 @@ except KeyboardInterrupt:
     server.stop()
     server.destroy()
     exit()
-    
