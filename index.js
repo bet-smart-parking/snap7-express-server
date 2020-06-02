@@ -6,7 +6,9 @@ const GateClient = require('./lib/gate-client')
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerDocument = require('./assets/openapi.json')
-const swaggerServers = process.env.SERVERS.split(',')
+const swaggerServers = process.env.SERVERS.split(',').map((value)=>({'url':value}))
+var swaggerDocumentWithServers = swaggerDocument
+swaggerDocumentWithServers.servers = swaggerServers
 
 const App = express()
 const port = process.env.PORT
@@ -33,7 +35,7 @@ App.get('/opengate/', async (req, res) => {
     Log.info('EXIT: ' + req.method + ' ' + req.url + ' ' + res.statusCode + ' %ds %dms', endedAt[0], endedAt[1] / 1000000)
 })
 
-App.use('/docs/', swaggerUi.serve, swaggerUi.setup(swaggerDocument))
+App.use('/docs/', swaggerUi.serve, swaggerUi.setup(swaggerDocumentWithServers))
 
 App.listen(port, () => {
     Log.info(`Server app listening on port ${port}!`)
