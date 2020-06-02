@@ -6,6 +6,7 @@ const GateClient = require('./lib/gate-client')
 
 const swaggerUi = require('swagger-ui-express')
 const swaggerDocument = require('./assets/openapi.json')
+const swaggerServers = process.env.SERVERS.split(',')
 
 const App = express()
 const port = process.env.PORT
@@ -18,9 +19,10 @@ App.get('/opengate/', async (req, res) => {
     Log.info('ENTER: ' + req.method + ' ' + req.url)
 
     try {
+        const gateId = req.query.gateId;
         const gateClient = GateClient(process.env.PLC_IP)
         await gateClient.connect()
-        await gateClient.open()
+        await gateClient.open(gateId)
         gateClient.disconnect()
     } catch (e) {
         return res.status(500).send('Could not connect to the gate system.')
