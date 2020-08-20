@@ -15,7 +15,7 @@ const port = process.env.PORT
 
 App.use(helmet())
 
-App.get('/opengate/', async (req, res) => {
+App.put('/opengate/', async (req, res) => {
     const startedAt = process.hrtime()
     Log.info() // Line break
     Log.info('ENTER: ' + req.method + ' ' + req.url)

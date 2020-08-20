@@ -24,7 +24,7 @@ $ sudo pip3 install python-snap7
 Start the mock server.
 
 ```
-$ sudo python3 gate-mock.py
+$ sudo python3 logo-mock.py
 ```
 
 To stop the server just press ```ctrl + c```.

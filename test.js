@@ -6,7 +6,7 @@ const GateClient = require('./lib/gate-client');
     Log.info('START To open the gate')
     const gateClient = GateClient(process.env.PLC_IP)
     await gateClient.connect()
-    await gateClient.open()
+    await gateClient.open(1)
     gateClient.disconnect()
     Log.info('EXIT Finished opening gate request')
 })()
