@@ -35,6 +35,12 @@ App.put('/opengate/', async (req, res) => {
     Log.info('EXIT: ' + req.method + ' ' + req.url + ' ' + res.statusCode + ' %ds %dms', endedAt[0], endedAt[1] / 1000000)
 })
 
+App.get('/monitoring/pong/', async (req, res) => {
+  Log.info() // Line break
+  Log.info('MONITORING: ' + req.method + ' ' + req.url)
+  res.status(200).send('I am alive');
+})
+
 App.use('/docs/', swaggerUi.serve, swaggerUi.setup(swaggerDocumentWithServers))
 
 App.listen(port, () => {
