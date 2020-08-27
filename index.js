@@ -12,6 +12,7 @@ swaggerDocumentWithServers.servers = swaggerServers
 
 const App = express()
 const port = process.env.PORT
+const VERSION = require('./package.json').version
 
 App.use(helmet())
 
@@ -38,7 +39,13 @@ App.put('/opengate/', async (req, res) => {
 App.get('/monitoring/pong/', async (req, res) => {
   Log.info() // Line break
   Log.info('MONITORING: ' + req.method + ' ' + req.url)
-  res.status(200).send('I am alive');
+
+  response = {}
+  response.message = 'I am alive'
+  response.status = 'up'
+  response.version = VERSION
+
+  res.status(200).send(response);
 })
 
 App.use('/docs/', swaggerUi.serve, swaggerUi.setup(swaggerDocumentWithServers))
