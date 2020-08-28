@@ -41,6 +41,7 @@ App.get('/monitoring/pong/', async (req, res) => {
   Log.info('MONITORING: ' + req.method + ' ' + req.url)
 
   response = {}
+  response.gcd_name = process.env.GCD_NAME
   response.message = 'I am alive'
   response.status = 'up'
   response.version = VERSION
