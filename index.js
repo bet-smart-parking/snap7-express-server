@@ -12,6 +12,7 @@ swaggerDocumentWithServers.servers = swaggerServers
 
 const App = express()
 const port = process.env.PORT
+const VERSION = require('./package.json').version
 
 App.use(helmet())
 
@@ -33,6 +34,18 @@ App.put('/opengate/', async (req, res) => {
     res.status(200).send('OK')
     const endedAt = process.hrtime(startedAt)
     Log.info('EXIT: ' + req.method + ' ' + req.url + ' ' + res.statusCode + ' %ds %dms', endedAt[0], endedAt[1] / 1000000)
+})
+
+App.get('/monitoring/pong/', async (req, res) => {
+  Log.info() // Line break
+  Log.info('MONITORING: ' + req.method + ' ' + req.url)
+
+  response = {}
+  response.message = 'I am alive'
+  response.status = 'up'
+  response.version = VERSION
+
+  res.status(200).send(response);
 })
 
 App.use('/docs/', swaggerUi.serve, swaggerUi.setup(swaggerDocumentWithServers))

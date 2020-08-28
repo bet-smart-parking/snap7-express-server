@@ -1,6 +1,6 @@
 {
   "name": "logo",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A simple node.js express REST server to write to a siemens logo.",
   "main": "index.js",
   "scripts": {
