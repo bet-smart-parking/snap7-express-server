@@ -30,7 +30,7 @@ try:
                 logging.info(server.event_text(event))
                 if event.EvtCode == 0x00840000 and (data[0] == 1 or data[0] == 2):
                     slackQueryData = '''{
-                        "channel": "#bets_smartparking_test",
+                        "channel": "#parcandi_notifications_test",
                         "username": "LogoBot",
                         "icon_emoji": ":house:",
                         "type": "mrkdwn",

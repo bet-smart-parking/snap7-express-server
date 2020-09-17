@@ -39,7 +39,7 @@ $ cp logo-mock.ini.example logo-mock.ini
 Start the mock server.
 
 ```
-$ sudo python3 gate-mock.py
+$ sudo python3 logo-mock.py
 ```
 
 To stop the server just press ```ctrl + c```.
