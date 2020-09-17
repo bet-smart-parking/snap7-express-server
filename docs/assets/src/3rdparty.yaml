@@ -1,0 +1,489 @@
+openapi: 3.0.3
+info:
+  description: "The smart parking platform is a set of tools to manage booking, check-in and check-out of parking lots."
+  version: "1.0.0"
+  title: "Smart Parking 3rd party API"
+  termsOfService: ""
+  contact:
+    email: "smartparking@baloise.ch"
+  license:
+    name: "Apache 2.0"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+servers: 
+  - url: https://us-central1-test-smart-parking-ch.cloudfunctions.net/v1
+tags:
+- name: facility
+  description: "Single parking facility"
+  externalDocs:
+    description: "Find out more"
+    url: "https://github.com/bet-smart-parking/documentation"
+- name: booking
+  description: "Booking of a parking lot"
+  externalDocs:
+    description: "Find out more"
+    url: "https://github.com/bet-smart-parking/documentation"
+- name: provider
+  description: "Endpoints for parking service providers who use the webview instead of the REST interface"
+  externalDocs:
+    description: "Find out more"
+    url: "https://github.com/bet-smart-parking/documentation"
+paths:
+  /facility:
+    get:
+      tags:
+      - facility
+      summary: "Returns general facility information of all facilities"
+      description: ""
+      responses:
+        200:
+          description: "List of all facilities"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Facility"
+  /facility/{facilityId}:
+    get:
+      tags:
+      - facility
+      summary: "Returns the general facility information"
+      description: ""
+      operationId: getFacilityById
+      parameters:
+      - name: facilityId
+        in: path
+        description: "ID of facility to return"
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json:
+              schema: 
+                $ref: "#/components/schemas/Facility"
+        404:
+          description: "Facility not found"
+  /facility/{facilityId}/estimate:
+    post:
+      tags:
+      - facility
+      summary: "Estimate the price"
+      description: ""
+      operationId: "getFacilityEstimateById"
+      parameters:
+      - name: facilityId
+        in: path
+        description: "ID of facility to compute the cost estimation"
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/x-www-from-urlencode:
+            schema:
+              type: object
+              properties:
+                startedAt:
+                  description: "Parking start time"
+                  type: string
+                  format: date-time
+                endedAt:
+                  description: "Parking end time"
+                  type: string
+                  format: date-time
+      responses:
+        200:
+          description: "successful operation"
+          content:
+            application/json: 
+              schema:
+                $ref: "#/components/schemas/Cost"
+        400:
+          description: "Invalid ID supplied"
+        404:
+          description: "Facility not found"
+        503: 
+          description: "Service unavailable"
+  /booking:
+    post:
+      tags:
+      - provider
+      summary: "Create booking of parking lot"
+      description: ""
+      operationId: createBooking
+      security:
+      - BasicAuth: []
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencode:
+            schema:
+              type: object
+              properties:
+                plate:
+                  description: "License plate of car"
+                  type: string
+                  example: "BS 123456"
+                callbackUrl:
+                  description: "Callback URL to get updates about the parking session to other applications"
+                  type: string
+                  example: "https://otherparkingplatform.com/send/callback/here"
+                facilityId:
+                  description: "The ID of the facility"
+                  example: "gIlP4ckDU4TXghi8Bh4V"
+      responses:
+        200:
+          description: "booking created"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bookingId:
+                    description: "Unique booking ID"
+                    type: string
+                    example: "afTe3G3hJJKLmnj"
+                  webviewUrl:
+                    description: "URL of a webview to control the parking session"
+                    type: string
+                    example: http://example.com/unique/parking/session/webview
+      callbacks:
+        Start:
+          '{$request.body#/callbackUrl}':
+            post:
+              requestBody:
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/BookingCallback'
+                    example:
+                      message: START
+                      plate: "BS 123456"
+                      bookingId: "afTe3G3hJJKLmnj"
+                      price: 
+                        facilityId: "gIlP4ckDU4TXghi8Bh4V"
+                        startedAt: "020-04-27T21:30:00Z"
+                        price: 
+                          currency: "CHF"
+                          number: 2.0
+                          formatted: "CHF 2.00"
+                        status: CURRENT
+              responses:
+                200:
+                  description: Your server returns this code if it accepts the callback
+        Stop:
+          '{$request.body#/callbackUrl}':
+            post:
+              requestBody:
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/BookingCallback' 
+                    example:
+                      message: STOP
+                      plate: "BS 123456"
+                      bookingId: "afTe3G3hJJKLmnj"
+                      price: 
+                        facilityId: "gIlP4ckDU4TXghi8Bh4V"
+                        startedAt: "020-04-27T21:30:00Z"
+                        endedAt: "2020-04-28T15:45:00Z"
+                        price: 
+                          currency: "CHF"
+                          number: 16.0
+                          formatted: "CHF 16.00"
+                        status: FINAL
+              responses:
+                200:
+                  description: "Your server returns this code if it accepts the callback"
+        Cancel:
+          '{$request.body#/callbackUrl}':
+            post:
+              requestBody:
+                required: true
+                content:
+                  application/json:
+                    schema:
+                      $ref: '#/components/schemas/BookingCallback'
+                    example:
+                        message: CANCEL
+                        plate: "BS 123456"
+                        bookingId: "afTe3G3hJJKLmnj"
+              responses:
+                200:
+                  description: "Your server returns this code if it accepts the callback"
+  /booking/{bookingId}/pay:
+    put:
+      tags: 
+      - provider
+      summary: "Update with payment information"
+      description: ""
+      operationId: setBookingPayment
+      security: 
+      - BasicAuth: []
+      parameters:
+      - name: bookingId
+        in: path
+        schema:
+          type: string
+        required: true
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencode:
+            schema:
+              type: object
+              properties:
+                total: 
+                  type: number
+                currency: 
+                  type: string
+                  enum:
+                    - CHF
+                paymentReference:
+                  type: string
+                  example: U34GFJ34sfgnbm
+                merchantReference:
+                  type: string
+                  example: ParkingMerchant1
+      responses:
+        200:
+          description: "OK"
+        400:
+          description: "BAD REQUEST: The request is either incomplete or wrong."
+        401:
+          description: "UNAUTHORIZED"
+        402: 
+          description: "The PaymentReference is not valid."
+        404:
+          description: "The booking ID was not found."
+        406:
+          description: "The amount does not match with costs of parking session."
+  /booking/{bookingId}:
+    get:
+      tags: 
+      - booking
+      summary: "TODO Get session info"
+      description: ""
+      operationId: getBookingCost
+      security: 
+      - BasicAuth: []
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Cost'
+        401:
+          description: "UNAUTHORIZED"
+        404:
+          description: "The booking ID was not found."
+  /provider/booking/{bookingId}:
+    get:
+      tags: 
+      - provider
+      summary: "Get session info"
+      description: ""
+      operationId: getBookingInfo
+      security: 
+      - BasicAuth: []
+      parameters:
+      - name: bookingId
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: "OK"
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  price:
+                    $ref: '#/components/schemas/Cost'
+                  webviewUrl:
+                    type: string
+                    example: http://example.com/unique/parking/session/webview
+        401:
+          description: "UNAUTHORIZED"
+        404:
+          description: "The booking ID was not found."
+components:
+  securitySchemes:
+    BasicAuth:
+      type: http
+      scheme: basic
+  schemas:
+    Facility:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "gIlP4ckDU4TXghi8Bh4V"
+        description:
+          allOf:
+            - $ref: "#/components/schemas/MultilanguageStringArray"
+          example:
+            de: ["Basel", "Lautengartenstrasse 6", "Picassoplatz"]
+            fr: ["Bâle","Lautengartenstrasse 6", "Picassoplatz"]
+            it: ["Basilea","Lautengartenstrasse 6", "Picassoplatz"]
+            en: ["Basel", "Basle","Lautengartenstrasse 6", "Picassoplatz"]
+        pricingInformation:
+          allOf: 
+            - $ref: "#/components/schemas/MultilanguageStringArray"
+          example:
+            de: ["CHF 2 je Stunde", "max. CHF 10 je Tag"]
+            fr: ["CHF 2 par heure", "max. CHF 10 par jour"]
+            it: ["CHF 2 all'ora", "max. CHF 10 al giorno"]
+            en: ["CHF 2 per hour", "max. CHF 10 per day"]
+        openingHours:
+          allOf: 
+            - $ref: "#/components/schemas/MultilanguageStringArray"
+          example:
+            de: ["Mo-Fr 7-18h"]
+            fr: ["lu-ve  7-18h"]
+            it: ["lu-ve  7-18h"]
+            en: ["mo-fr 7-18h"]
+        geo:
+          type: object
+          properties:
+            latitude:
+              type: string
+              example: "47.552953"
+            longitude:
+              type: string
+              example: "7.595655"
+        address:
+          type: object
+          properties:
+            street:
+              type: string
+              example: "Lautengartenstrasse"
+            streetNumber:
+              type: string
+              example: "6"
+            postalCode:
+              type: string
+              example: "4052"
+            city:
+              type: string
+              example: "Basel"
+        images:
+          $ref: "#/components/schemas/Images"
+        name:
+          type: string
+          description: "Parking facility name"
+          example: "Picassoplatz"
+        parkingHint:
+          allOf:
+            - $ref: '#/components/schemas/MultilanguageStringArray'
+          example:
+              de: ["Smart Parking Parkplätze im 2. UG (siehe Markierung)"]
+              fr: ["Places de stationnement Smart Parking au 2e sous-sol (voir marquage)"]
+              it: ["Parcheggi Smart Parking al 2° seminterrato (vedi marcatura)"]
+              en: ["Smart Parking spaces on the 2nd basement (see marking)"]
+        capacity:
+          description: "Total capacity of the parking facility"
+          type: integer
+          format: int64
+          example: 10
+        occupied:
+          description: "Currently occupied parking lots of the facility"
+          type: integer
+          format: int64
+          example: 6
+    Cost:
+      type: object
+      properties:
+        facilityId:
+          type: string
+          example: "gIlP4ckDU4TXghi8Bh4V"
+        startedAt:
+          type: string
+          example: "2020-04-27T21:30:00Z"
+        endedAt:
+          type: string
+          example: "2020-04-28T15:45:00Z"
+        price:
+          type: object
+          properties:
+            currency:
+              type: string
+              example: "CHF"
+            total: 
+              type: number
+              example: 16.0
+            formatted:
+              type: string
+              example: "CHF 16.00"
+        status:
+          type: string
+          description: "<ul><li>ESTIMATE: cost estimate</li><li>CURRENT: price of an ongoing booking</li><li>FINAL: price of a finished booking</li></ul>"
+          enum:
+          - ESTIMATE
+          - CURRENT
+          - FINAL
+          example: ESTIMATE
+    MultilanguageStringArray:
+      type: object
+      properties:
+        de:
+          type: array
+          items:
+            type: string
+        fr:
+          type: array
+          items:
+            type: string
+        it:
+          type: array
+          items:
+            type: string
+        en:
+          type: array
+          items:
+            type: string
+    BookingCallback:
+      type: object
+      properties:
+        message:
+          type: string
+          enum:
+          - START
+          - STOP
+          - CANCEL
+          - UPDATE
+        plate:
+          type: string
+        bookingId:
+            description: "Unique booking ID"
+            type: string
+        price: 
+          $ref: '#/components/schemas/Cost'
+    Images:
+      type: object
+      properties:
+        folderName: 
+          type: string
+          example: "picasso"
+        thumbnail:
+          type: string
+          description: "Facility thumbnail"
+          example: "https://smartparking.com/imageurl/thumbnail.jpeg"
+externalDocs:
+  description: "Find out more about SmartParking"
+  url: "https://github.com/bet-smart-parking/documentation"
