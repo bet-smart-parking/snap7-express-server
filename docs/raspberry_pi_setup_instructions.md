@@ -44,7 +44,7 @@ at the end of the file to enable the Pi zero Enc28j60 Network Adapter Module. Th
 
 ## Raspberry Pi with 3g/4g/LTE hat
 
-tbd.
+See [the section about setting up Raspberry Pi's with the SIM7600 UMTS hat](./raspberry_pi_umts-setup.md)
 
 
 ## Install Node
