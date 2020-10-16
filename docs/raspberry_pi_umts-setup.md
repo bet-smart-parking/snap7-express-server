@@ -19,9 +19,10 @@ SSH into RPi. Ensure in the boot/config.txt file that UART is enabled, the defau
 ```sh
 nano /boot/config.txt
 ```
-If not already done, add the following to the end of the file.
+Enable UART and disable Wifi using the following two lines
 ```
 enable_uart=1
+dtoverlay=disable-wifi
 ```
 
 Next, in raspi config change serial settings so that serial login is disabled, but overall serial is enabled.
@@ -220,6 +221,24 @@ Oct 15 07:59:49 prine-pi-1 chat[1245]: send (^M)
 ```
 CONGRATS, you successfully connected to the internet using PPP and LTE.
 
+## Automatic PPP Connection On Boot
+If you'd like to configure your device to automatically bring up the PPP connection on boot, it's easy to do so by updating the network configuration. First make sure you've verified you can manually bring up the PPP connection in the previous steps.
+
+Edit the /etc/network/interfaces file by executing:
+
+```sh
+sudo nano /etc/network/interfaces
+```
+
+```
+auto parcandi
+iface parcandi inet ppp
+	provider parcandi
+```
+This configuration will tell your device to bring up the PPP peer automatically on boot. The configuration in /etc/ppp/peers/parcandi will be used to set up the PPP connection.
+
+If the SIM7600 cannot be connected to by serial, adding the above lines will make the raspberry pi retry the connection once a minute indefinitely.
+
 ## Test 1: show ifconfig
 ```sh
 $ ifconfig
@@ -246,19 +265,3 @@ AT+CGDCONT?
 +CGDCONT: 5,"IPV4V6","","0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0",0,0,0,0
 +CGDCONT: 6,"IPV4V6","ctlte","0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0",0,0,0,0
 ```
-
-## Automatic PPP Connection On Boot
-If you'd like to configure your device to automatically bring up the PPP connection on boot, it's easy to do so by updating the network configuration. First make sure you've verified you can manually bring up the PPP connection in the previous steps.
-
-Edit the /etc/network/interfaces file by executing:
-
-```sh
-sudo nano /etc/network/interfaces
-```
-
-```
-auto parcandi
-iface parcandi inet ppp
-	provider parcandi
-```
-This configuration will tell your device to bring up the PPP peer automatically on boot. The configuration in /etc/ppp/peers/parcandi will be used to set up the PPP connection.
