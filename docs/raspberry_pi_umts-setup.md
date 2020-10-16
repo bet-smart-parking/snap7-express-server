@@ -14,15 +14,14 @@ First, make sure no SIM card password is set. This can be achieved by disabling 
 
 ![Module](https://www.waveshare.com/img/devkit/accBoard/SIM7600E-LTE-Cat-1-HAT/SIM7600E-LTE-Cat-1-HAT-19_960.jpg)
 
-SSH into RPi. Ensure in the boot/config.txt file that UART is enabled, the default Parcandi image already had this
+SSH into RPi over Wifi and pubkey or log in using a monitor and keyboard. The former makes things easier unless you want to type whole config files manually. Ensure in the boot/config.txt file that UART is enabled, the default Parcandi image already had this
 
 ```sh
-nano /boot/config.txt
+sudo nano /boot/config.txt
 ```
-Enable UART and disable Wifi using the following two lines
+Enable UART using the following line
 ```
 enable_uart=1
-dtoverlay=disable-wifi
 ```
 
 Next, in raspi config change serial settings so that serial login is disabled, but overall serial is enabled.
@@ -36,6 +35,10 @@ sudo raspi-config
 Create the file "simPinBindings", enter the following to set pin bindings
 
 ```sh
+sudo nano ~/simPinBindings
+```
+
+```sh
 # filename simPinBindings
 echo "4" > /sys/class/gpio/export
 sleep 0.1
@@ -45,6 +48,10 @@ echo "6" > /sys/class/gpio/export
 sleep 0.1
 echo "out" > /sys/class/gpio/gpio6/direction
 echo "0" > /sys/class/gpio/gpio6/value
+```
+make file executable
+```sh
+sudo chmod 777 simPinBindings
 ```
 
 On boot, ensure bindings are set by editing the /etc/rc.local file
@@ -57,8 +64,6 @@ Insert line
 
 ```sh
 sh /home/pi/simPinBindings
-
-# has to be before the exit 0 statement at eof
 ```
 
 reboot
@@ -92,10 +97,6 @@ IMEI: 867584034313614
 # test signal strength
 AT+CSQ
 +CSQ: 19,99
-
-# enter twice
-AT+CPSI?
-ERROR
 
 AT+CPSI?
 +CPSI: LTE,Online,228-02,0x9CA4,20964868,46,EUTRAN-BAND20,6200,3,3,-178,-1089,-742,8
@@ -158,12 +159,22 @@ nocrtscts
 local
 ```
 
-CONGRATS, you successfully connected to the internet using PPP and LTE.
+Exit root user.
 
 ## Automatic PPP Connection On Boot
-If you'd like to configure your device to automatically bring up the PPP connection on boot, it's easy to do so by updating the network configuration. First make sure you've verified you can manually bring up the PPP connection in the previous steps.
+To automatically bring up the PPP connection on boot, update the network configuration. First make sure you've verified you can manually bring up the PPP connection using
 
-Edit the /etc/network/interfaces file by executing:
+```sh
+sudo pon parcandi
+
+ifconfig
+# if device PPP0 is available and google.com is pingable,
+
+# turn off again with
+sudo poff parcandi
+```
+
+If everything is okay, edit the /etc/network/interfaces file by executing:
 
 ```sh
 sudo nano /etc/network/interfaces
@@ -174,17 +185,29 @@ auto parcandi
 iface parcandi inet ppp
 	provider parcandi
 ```
-This configuration will tell your device to bring up the PPP peer automatically on boot. The configuration in /etc/ppp/peers/parcandi will be used to set up the PPP connection.
+This configuration will tell your device to bring up the PPP peer automatically on boot. The configuration previously set in /etc/ppp/peers/parcandi will be used to set up the PPP connection.
 
-If the SIM7600 cannot be connected to by serial, adding the above lines will make the raspberry pi retry the connection once a minute indefinitely.
+The raspberry pi is set to retry to establish the connection once a minute indefinitely if it is broken.
+
+## Disable Wifi
+Disable Wifi to ensure that PPP0 is always selected as network interface. Remember that all SSH connections over Wifi will be disabled on reboot.
+
+```sh
+sudo nano /boot/config.txt
+```
+Disable wifi
+```
+dtoverlay=disable-wifi
+```
+
 
 ## Troubleshooting
 
-Using the config introduced in the previous section, the RPi retries to establish a PPP link once a minute if it is lost. If the device just freshly booted, it might take a minute for a PPP connection to be made headlessly
+Using the config introduced in the previous section, the RPi retries to establish a PPP link once a minute if it is lost. If the device just freshly booted, it might take a minute for a PPP connection to be made.
 
 If issues persist, check the PPPD log files using
 ```sh
-$ cat /var/log/syslog | grep pppd
+cat /var/log/syslog | grep pppd
 ```
 
 Perhaps the SIM7600 is misconfigured and the RPi cannot communicate with it over serial. To get an idea of how PPP is trying to interface with the SIM7600 over serial, execute the following
@@ -192,15 +215,6 @@ Perhaps the SIM7600 is misconfigured and the RPi cannot communicate with it over
 cat /var/log/syslog | grep chat
 ```
 Another clear sign that something is wrong is when the NET LED below the PWR LED on the SIM7600 is not turned on. Then the net button manually has to be pressed. Check if Wifi is disabled if this is the case, as outlined in "Set up serial connection". Attaching a USB cable between RPi and SIM7600 can prevent the RPi from booting, so avoid this.
-
-### Manual PPP start / shutdown
-
-Just for reference, the PPP link can manually be turned on and off using the pon and poff commands.
-
-```sh
-sudo pon parcandi
-sudo poff parcandi
-```
 
 ## Test 1: show ifconfig
 ```sh
