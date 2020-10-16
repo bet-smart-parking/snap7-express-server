@@ -158,67 +158,6 @@ nocrtscts
 local
 ```
 
-```sh
-$ sudo pon parcandi
-$ cat /var/log/syslog | grep pppd
-Oct 15 07:59:49 prine-pi-1 pppd[1240]: pppd 2.4.7 started by root, uid 0
-Oct 15 07:59:49 prine-pi-1 pppd[1240]: Serial connection established.
-Oct 15 07:59:49 prine-pi-1 pppd[1240]: Using interface ppp0
-Oct 15 07:59:49 prine-pi-1 pppd[1240]: Connect: ppp0 <--> /dev/ttyS0
-Oct 15 07:59:50 prine-pi-1 pppd[1240]: PAP authentication succeeded
-Oct 15 07:59:50 prine-pi-1 pppd[1240]: Could not determine remote IP address: defaulting to 10.64.64.64
-Oct 15 07:59:50 prine-pi-1 pppd[1240]: not replacing default route to wlan0 [192.168.1.1]
-Oct 15 07:59:50 prine-pi-1 pppd[1240]: local  IP address 10.147.178.83
-Oct 15 07:59:50 prine-pi-1 pppd[1240]: remote IP address 10.64.64.64
-Oct 15 07:59:50 prine-pi-1 pppd[1240]: primary   DNS address 10.200.102.244
-Oct 15 07:59:50 prine-pi-1 pppd[1240]: secondary DNS address 10.200.102.243
-```
-
-Here is what the PPP script is actually instructing the SIM7600 to do in the background:
-```
-cat /var/log/syslog | grep chat
-Oct 15 07:59:49 prine-pi-1 chat[1245]: abort on (BUSY)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: abort on (VOICE)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: abort on (NO CARRIER)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: abort on (NO DIALTONE)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: abort on (NO DIAL TONE)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: abort on (NO ANSWER)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: abort on (DELAYED)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: abort on (ERROR)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: abort on (+CGATT: 0)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: send (AT^M)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: timeout set to 12 seconds
-Oct 15 07:59:49 prine-pi-1 chat[1245]: expect (OK)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: AT^M^M
-Oct 15 07:59:49 prine-pi-1 chat[1245]: OK
-Oct 15 07:59:49 prine-pi-1 chat[1245]:  -- got it
-Oct 15 07:59:49 prine-pi-1 chat[1245]: send (ATH^M)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: expect (OK)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: ^M
-Oct 15 07:59:49 prine-pi-1 chat[1245]: ATH^M^M
-Oct 15 07:59:49 prine-pi-1 chat[1245]: OK
-Oct 15 07:59:49 prine-pi-1 chat[1245]:  -- got it
-Oct 15 07:59:49 prine-pi-1 chat[1245]: send (ATE1^M)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: expect (OK)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: ^M
-Oct 15 07:59:49 prine-pi-1 chat[1245]: ATE1^M^M
-Oct 15 07:59:49 prine-pi-1 chat[1245]: OK
-Oct 15 07:59:49 prine-pi-1 chat[1245]:  -- got it
-Oct 15 07:59:49 prine-pi-1 chat[1245]: send (AT+CGDCONT=1,"IP","dr.m2m.ch","",0,0^M)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: expect (OK)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: ^M
-Oct 15 07:59:49 prine-pi-1 chat[1245]: AT+CGDCONT=1,"IP","dr.m2m.ch","",0,0^M^M
-Oct 15 07:59:49 prine-pi-1 chat[1245]: OK
-Oct 15 07:59:49 prine-pi-1 chat[1245]:  -- got it
-Oct 15 07:59:49 prine-pi-1 chat[1245]: send (ATD*99#^M)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: timeout set to 22 seconds
-Oct 15 07:59:49 prine-pi-1 chat[1245]: expect (CONNECT)
-Oct 15 07:59:49 prine-pi-1 chat[1245]: ^M
-Oct 15 07:59:49 prine-pi-1 chat[1245]: ATD*99#^M^M
-Oct 15 07:59:49 prine-pi-1 chat[1245]: CONNECT
-Oct 15 07:59:49 prine-pi-1 chat[1245]:  -- got it
-Oct 15 07:59:49 prine-pi-1 chat[1245]: send (^M)
-```
 CONGRATS, you successfully connected to the internet using PPP and LTE.
 
 ## Automatic PPP Connection On Boot
@@ -238,6 +177,30 @@ iface parcandi inet ppp
 This configuration will tell your device to bring up the PPP peer automatically on boot. The configuration in /etc/ppp/peers/parcandi will be used to set up the PPP connection.
 
 If the SIM7600 cannot be connected to by serial, adding the above lines will make the raspberry pi retry the connection once a minute indefinitely.
+
+## Troubleshooting
+
+Using the config introduced in the previous section, the RPi retries to establish a PPP link once a minute if it is lost. If the device just freshly booted, it might take a minute for a PPP connection to be made headlessly
+
+If issues persist, check the PPPD log files using
+```sh
+$ cat /var/log/syslog | grep pppd
+```
+
+Perhaps the SIM7600 is misconfigured and the RPi cannot communicate with it over serial. To get an idea of how PPP is trying to interface with the SIM7600 over serial, execute the following
+```sh
+cat /var/log/syslog | grep chat
+```
+Another clear sign that something is wrong is when the NET LED below the PWR LED on the SIM7600 is not turned on. Then the net button manually has to be pressed. Check if Wifi is disabled if this is the case, as outlined in "Set up serial connection". Attaching a USB cable between RPi and SIM7600 can prevent the RPi from booting, so avoid this.
+
+### Manual PPP start / shutdown
+
+Just for reference, the PPP link can manually be turned on and off using the pon and poff commands.
+
+```sh
+sudo pon parcandi
+sudo poff parcandi
+```
 
 ## Test 1: show ifconfig
 ```sh
