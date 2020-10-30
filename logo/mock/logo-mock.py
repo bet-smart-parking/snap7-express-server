@@ -28,7 +28,7 @@ try:
             event = server.pick_event()
             if event:
                 logging.info(server.event_text(event))
-                if event.EvtCode == 0x00840000 and (data[0] == 1 or data[0] == 2):
+                if event.EvtCode == 0x00840000 and (data[0] == 1 or data[0] == 2 or data[0] == 3):
                     slackQueryData = '''{
                         "channel": "#parcandi_notifications_test",
                         "username": "LogoBot",
