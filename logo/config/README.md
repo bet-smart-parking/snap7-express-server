@@ -8,4 +8,4 @@ A sample configuration file for Siemens LOGO!8 with configuration of 2 gates.
 
 Download ```SmartParking.lsc``` with LOGO!Soft Comfort 8.2 to your LOGO!8 device.
 
-The IP address of LOGO!8 will be 192.168.1.3 after downloading the configuration to your device.
+The IP address of LOGO!8 will be 192.168.0.3 after downloading the configuration to your device.
